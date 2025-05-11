@@ -51,15 +51,14 @@ class MainUI(tk.Tk):
 class StartPage(tk.Frame):
 
     def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent, bg="pink")  # Đặt màu nền hồng cho Frame
-        self.controller = controller
+        tk.Frame.__init__(self, parent, bg="pink")
 
         render = PhotoImage(file='homepagepic.png')
-        img = tk.Label(self, image=render, bg="pink")  # Đặt nền hồng cho label ảnh
+        img = tk.Label(self, image=render, bg="pink")
         img.image = render
         img.grid(row=0, column=1, rowspan=4, sticky="nsew")
 
-        label = tk.Label(self, text="        Home Page        ", font=self.controller.title_font, fg="#263942", bg="pink")  # Thêm bg
+        label = tk.Label(self, text="        Home Page        ", font=self.controller.title_font, fg="#263942", bg="pink")  
         label.grid(row=0, sticky="ew")
 
         button1 = tk.Button(self, text="   Sign up  ", fg="#ffffff", bg="#263942", command=lambda: self.controller.show_frame("PageOne"))
@@ -114,31 +113,35 @@ class PageOne(tk.Frame):
         name = self.user_name.get().strip()
         sid = self.student_id.get().strip()
         cid = self.class_id.get().strip()
-
-        # Kiểm tra các trường có rỗng không
+        
         if not name or not sid or not cid:
             messagebox.showerror("Error", "All fields are required!")
             return
 
-        # Kiểm tra trường hợp đặc biệt
-        full_info = f"{name}_{sid}_{cid}"  # Gom 3 thông tin lại
+        full_info = f"{name}_{sid}_{cid}"
 
         if full_info == "None_None_None":
             messagebox.showerror("Error", "Invalid input: None_None_None")
             return
-        elif full_info in names:
+        
+        for existing in names:
+            parts = existing.split("_")
+            if len(parts) >= 2 and parts[1] == sid:
+                messagebox.showerror("Error", f"Student ID '{sid}' already exists! Please enter a different ID.")
+                return
+
+        if full_info in names:
             messagebox.showerror("Error", "User already exists!")
             return
-
-        # Thêm vào tập và chuyển trang
         names.add(full_info)
         self.controller.active_name = full_info
-        
+
         # Cập nhật lại các trang sau khi thay đổi thông tin
-       # self.controller.frames["PageTwo"].refresh_names()  # Cập nhật thông tin ở PageTwo
-        self.controller.frames["PageThree"].update_info()  # Cập nhật thông tin ở PageThree
-        
-        self.controller.show_frame("PageThree")  # Chuyển sang PageThree
+        # self.controller.frames["PageTwo"].refresh_names()
+        self.controller.frames["PageThree"].update_info()
+
+        self.controller.show_frame("PageThree")
+
 
     def clear(self):
         self.user_name.delete(0, 'end')
@@ -188,12 +191,14 @@ class PageTwo(tk.Frame):
         # Gom thông tin lại để làm tham số cho PageFour
         full_info = f"{name}_{sid}_{cid}"
 
-        # Lưu thông tin này vào controller để sử dụng ở PageFour
+        # PHẢI tồn tại trong danh sách thì mới cho qua
+        if full_info not in names:
+            messagebox.showerror("Error", "This user does not exist!")
+            return
+
+        # Nếu hợp lệ, lưu thông tin và chuyển trang
         self.controller.active_name = full_info
-
-        # Chuyển đến PageFour
-        self.controller.show_frame("PageFour")  
-
+        self.controller.show_frame("PageFour")
     def clear(self):
         self.user_name.delete(0, 'end')
         self.student_id.delete(0, 'end')
