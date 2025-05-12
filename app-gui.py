@@ -52,7 +52,7 @@ class StartPage(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg="pink")
-
+        self.controller = controller
         render = PhotoImage(file='homepagepic.png')
         img = tk.Label(self, image=render, bg="pink")
         img.image = render
